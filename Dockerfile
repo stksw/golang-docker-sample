@@ -1,6 +1,6 @@
 FROM golang:1.15.7-alpine as dev
 ENV ROOT=/go/src/app
-ENV CGO_ENABLED 0
+ENV CGO_ENABLED 1
 
 WORKDIR ${ROOT}
 RUN apk update && apk add git make g++ ruby-dev sqlite-dev 

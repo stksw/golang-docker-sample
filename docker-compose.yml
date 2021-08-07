@@ -1,19 +1,31 @@
 version: "3.8"
 services:
-  db:
-    image: postgres:13.1-alpine
+  postgres:
+    image: postgres
+    container_name: postgres
+    ports:
+      - 5555:5432
     volumes:
-      - ./tmp/db:/var/lib/postgresql/data
+      - pgsql-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: password
-      PGDATA: /var/lib/postgresql/data/pgdata
-  sqlite:
-    image: nouchka/sqlite3
-    stdin_open: true
+      POSTGRES_DB: testdb
     tty: true
-    volumes:
-      - ./sqlite:/root/db
+    user: root
+    restart: always
+  pgweb:
+    image: sosedoff/pgweb
+    container_name: pgweb
+    ports:
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgres://root:password@postgres:5432/testdb?sslmode=disable
+    links:
+      - postgres:postgres
+    restart: always
+    depends_on:
+      - postgres
   web:
     build:
       context: .
@@ -26,4 +38,8 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - db
+      - postgres
+
+volumes:
+  pgsql-data:
+    driver: local
